@@ -7,15 +7,20 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
+     ,"supabase:init": "node scripts/initSupabase.js"
   },
   "dependencies": {
     "next": "16.2.9",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "@supabase/supabase-js": "^2.0.0",
     "sql.js": "^1.11.0"
   },
   "devDependencies": {
+    "dotenv": "^16.3.1",
+    "pg": "^8.11.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.9"
   }
+  
 }
