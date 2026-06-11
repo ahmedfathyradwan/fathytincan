@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Fathy Tin Can - نظام إدارة أوامر الإنتاج
 
-## Getting Started
+تطبيق ويب حديث متكامل لإدارة وجدولة أوامر الإنتاج لمصنع العبوات المعدنية (Fathy Tin Can Co.).
 
-First, run the development server:
+## 🚀 التقنيات المستخدمة (Tech Stack)
+* **Framework**: Next.js (App Router)
+* **Styling**: Native CSS Modules (تصميم يدعم RTL والوضع الفاتح بالكامل)
+* **Database**: SQLite (باستخدام مكتبة `sql.js` وحفظ البيانات بشكل دائم على الخادم)
+* **Authentication**: كوكيز آمنة بجلسة عمل آمنة لحماية المسارات وواجهات البرمجة
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ المميزات الرئيسية
+1. **نظام تسجيل دخول آمن**: باستخدام اسم المستخدم `fathy` وكلمة المرور `6666`.
+2. **جدولة وتصفية تلقائية**: فرز الأوامر تلقائياً حسب مقاس العلبة (من الأصغر حجماً إلى الأكبر حجماً) وليس تاريخ الإنشاء.
+3. **أرقام تسلسلية ذكية**: يتم حساب وترتيب الأرقام التسلسلية للأوامر تلقائياً وبشكل متسلسل بدون أي فجوات عند الحذف.
+4. **تحديث فوري للإحصائيات**: شريط إحصائيات سفلي مثبت يظهر مجاميع العبوات لكل مقاس مع الإجمالي العام بالآلاف ويتحدث فوراً مع كل إضافة، تعديل، أو حذف.
+5. **تنسيق لوني بصري**: تمييز مقاسات العلب (تمن، ربع، نصف، لتر، إلخ) بألوان هادئة ومميزة تتيح التفرقة البصرية السريعة بين المقاسات.
+6. **إدارة مرنة**: إدخال اسم الشركة من قائمة معينة بالترتيب الأبجدي، وإدخال اسم العبوة كحقل نصي حر.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 💻 التشغيل محلياً
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+1. **تثبيت التبعيات**:
+   ```bash
+   npm install
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. **تشغيل الخادم المحلي**:
+   ```bash
+   npm run dev
+   ```
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. افتح الرابط التالي في المتصفح:
+   [http://localhost:3000](http://localhost:3000)
