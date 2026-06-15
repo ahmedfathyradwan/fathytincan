@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
+import { CheckCircle2, XCircle, Info, X } from 'lucide-react';
 import styles from './Toast.module.css';
 
 export function useToast() {
@@ -37,10 +38,10 @@ export default function Toast({ toasts, onRemove }) {
 
   const getIcon = (type) => {
     switch (type) {
-      case 'success': return '✓';
-      case 'error': return '✕';
-      case 'info': return 'ℹ';
-      default: return '✓';
+      case 'success': return <CheckCircle2 size={18} />;
+      case 'error':   return <XCircle size={18} />;
+      case 'info':    return <Info size={18} />;
+      default:        return <CheckCircle2 size={18} />;
     }
   };
 
@@ -54,7 +55,7 @@ export default function Toast({ toasts, onRemove }) {
           <span className={styles.toastIcon}>{getIcon(toast.type)}</span>
           <span className={styles.toastMessage}>{toast.message}</span>
           <button className={styles.toastClose} onClick={() => onRemove(toast.id)} type="button">
-            ✕
+            <X size={14} />
           </button>
         </div>
       ))}

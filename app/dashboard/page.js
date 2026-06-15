@@ -7,6 +7,7 @@ import OrderModal from '../components/OrderModal/OrderModal';
 import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
 import Toast, { useToast } from '../components/Toast/Toast';
 import StatsBar from '../components/StatsBar/StatsBar';
+import { Factory, LogOut, Package, Pencil, Trash2, Plus } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -194,7 +195,7 @@ export default function DashboardPage() {
           </div>
 
           <div className={styles.headerTitle} style={{ margin: '0 auto' }}>
-            <span className={styles.headerIcon}>🏭</span>
+            <span className={styles.headerIcon}><Factory size={32} strokeWidth={1.5} /></span>
             <div className={styles.headerText} style={{ textAlign: 'center' }}>
               <h1>نظام إدارة أوامر الإنتاج</h1>
               <p>Fathy Tin Can Co.</p>
@@ -202,7 +203,7 @@ export default function DashboardPage() {
           </div>
 
           <button id="logout-btn" className={styles.logoutButton} onClick={handleLogout} type="button">
-            <span className={styles.logoutIcon}>🚪</span>
+            <span className={styles.logoutIcon}><LogOut size={16} /></span>
             <span>تسجيل الخروج</span>
           </button>
         </div>
@@ -223,7 +224,7 @@ export default function DashboardPage() {
             </div>
           ) : orders.length === 0 ? (
             <div className={styles.emptyState}>
-              <div className={styles.emptyIcon}>📦</div>
+              <div className={styles.emptyIcon}><Package size={64} strokeWidth={1} /></div>
               <h3 className={styles.emptyTitle}>لا توجد أوامر إنتاج حالياً</h3>
               <p className={styles.emptyDescription}>اضغط على الزر العائم في الأسفل لإضافة أول أمر.</p>
             </div>
@@ -271,7 +272,7 @@ export default function DashboardPage() {
                             title="تعديل"
                             type="button"
                           >
-                            ✏️
+                            <Pencil size={15} />
                           </button>
                           <button
                             id={`delete-btn-${order.id}`}
@@ -280,7 +281,7 @@ export default function DashboardPage() {
                             title="حذف"
                             type="button"
                           >
-                            🗑️
+                            <Trash2 size={15} />
                           </button>
                         </div>
                       </td>
@@ -301,7 +302,7 @@ export default function DashboardPage() {
         title="إضافة أمر إنتاج"
         type="button"
       >
-        ➕
+        <Plus size={28} strokeWidth={2.5} />
       </button>
 
       {/* Statistics Bar at the bottom */}

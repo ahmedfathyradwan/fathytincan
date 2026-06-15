@@ -1,5 +1,6 @@
 'use client';
 
+import { AlertTriangle } from 'lucide-react';
 import styles from './ConfirmModal.module.css';
 
 export default function ConfirmModal({ isOpen, onClose, onConfirm, loading }) {
@@ -12,7 +13,9 @@ export default function ConfirmModal({ isOpen, onClose, onConfirm, loading }) {
   return (
     <div className={styles.overlay} onClick={handleOverlayClick}>
       <div className={styles.modal}>
-        <div className={styles.warningIcon}>⚠️</div>
+        <div className={styles.warningIcon}>
+          <AlertTriangle size={48} strokeWidth={1.5} />
+        </div>
         <h3 className={styles.title}>هل أنت متأكد من حذف هذا الطلب؟</h3>
         <div className={styles.buttons}>
           <button
