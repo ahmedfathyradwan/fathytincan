@@ -1,5 +1,5 @@
-import { getSupabase } from '@/lib/supabaseClient';
-import { getDb, saveDb } from '@/lib/db';
+import { connectToDatabase } from '@/lib/mongoose';
+import Order from '@/lib/models/Order';
 import { cookies } from 'next/headers';
 
 const SESSION_TOKEN = 'fathy_session_valid_2024';
@@ -10,7 +10,7 @@ async function checkAuth() {
   return session && session.value === SESSION_TOKEN;
 }
 
-// GET all orders sorted by sizeValue
+// GET all orders sorted by sizeValue then _id
 export async function GET() {
   const isAuth = await checkAuth();
   if (!isAuth) {
@@ -18,37 +18,21 @@ export async function GET() {
   }
 
   try {
-    // Try Supabase first; fallback to local SQL.js DB if not configured
-    try {
-      const supabase = getSupabase();
-      const { data: orders, error } = await supabase
-        .from('orders')
-        .select('*')
-        .order('sizeValue', { ascending: true })
-        .order('id', { ascending: true });
+    await connectToDatabase();
 
-      if (error) throw error;
+    const orders = await Order.find()
+      .sort({ sizeValue: 1, _id: 1 })
+      .lean();
 
-      const ordersWithNumbers = orders.map((order, index) => ({ ...order, orderNumber: index + 1 }));
-      return Response.json({ orders: ordersWithNumbers });
-    } catch (supabaseErr) {
-      // fallback to local DB
-      const db = await getDb();
-      const res = db.exec("SELECT id, companyName, quantity, sizeValue, sizeLabel, canName, status, createdAt FROM orders ORDER BY sizeValue ASC, id ASC;");
-      let orders = [];
-      if (res && res.length > 0) {
-        const { columns, values } = res[0];
-        orders = values.map((row) => {
-          const obj = {};
-          columns.forEach((col, i) => (obj[col] = row[i]));
-          return obj;
-        });
-      }
+    const ordersWithNumbers = orders.map((order, index) => ({
+      ...order,
+      id: order._id.toString(),
+      orderNumber: index + 1,
+    }));
 
-      const ordersWithNumbers = orders.map((order, index) => ({ ...order, orderNumber: index + 1 }));
-      return Response.json({ orders: ordersWithNumbers });
-    }
+    return Response.json({ orders: ordersWithNumbers });
   } catch (error) {
+    console.error('GET /api/orders error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 }
@@ -64,7 +48,6 @@ export async function POST(request) {
     const body = await request.json();
     const { companyName, quantity, sizeValue, sizeLabel, canName, status } = body;
 
-    // Validate
     if (!companyName || !quantity || !sizeValue || !sizeLabel || !canName || !status) {
       return Response.json({ error: 'جميع الحقول مطلوبة' }, { status: 400 });
     }
@@ -73,33 +56,23 @@ export async function POST(request) {
       return Response.json({ error: 'الكمية يجب أن تكون رقم صحيح أكبر من صفر' }, { status: 400 });
     }
 
-    const createdAt = new Date().toISOString();
-    try {
-      const supabase = getSupabase();
-      const { error } = await supabase.from('orders').insert([
-        {
-          companyName,
-          quantity: parseInt(quantity, 10),
-          sizeValue: parseFloat(sizeValue),
-          sizeLabel,
-          canName,
-          status,
-          createdAt,
-        },
-      ]);
+    await connectToDatabase();
 
-      if (error) throw error;
-      return Response.json({ success: true, message: 'تم إضافة الطلب بنجاح' });
-    } catch (supabaseErr) {
-      const db = await getDb();
-      db.run(
-        'INSERT INTO orders (companyName, quantity, sizeValue, sizeLabel, canName, status, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?);',
-        [companyName, parseInt(quantity, 10), parseFloat(sizeValue), sizeLabel, canName, status, createdAt]
-      );
-      saveDb();
-      return Response.json({ success: true, message: 'تم إضافة الطلب محليًا بنجاح' });
-    }
+    const newOrder = new Order({
+      companyName,
+      quantity: parseInt(quantity, 10),
+      sizeValue: parseFloat(sizeValue),
+      sizeLabel,
+      canName,
+      status,
+      createdAt: new Date().toISOString(),
+    });
+
+    await newOrder.save();
+
+    return Response.json({ success: true, message: 'تم إضافة الطلب بنجاح' });
   } catch (error) {
+    console.error('POST /api/orders error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 }
@@ -127,32 +100,28 @@ export async function PUT(request) {
       return Response.json({ error: 'الكمية يجب أن تكون رقم صحيح أكبر من صفر' }, { status: 400 });
     }
 
-    try {
-      const supabase = getSupabase();
-      const { error } = await supabase
-        .from('orders')
-        .update({
-          companyName,
-          quantity: parseInt(quantity, 10),
-          sizeValue: parseFloat(sizeValue),
-          sizeLabel,
-          canName,
-          status,
-        })
-        .eq('id', parseInt(id, 10));
+    await connectToDatabase();
 
-      if (error) throw error;
-      return Response.json({ success: true, message: 'تم تحديث الطلب بنجاح' });
-    } catch (supabaseErr) {
-      const db = await getDb();
-      db.run(
-        'UPDATE orders SET companyName = ?, quantity = ?, sizeValue = ?, sizeLabel = ?, canName = ?, status = ? WHERE id = ?;',
-        [companyName, parseInt(quantity, 10), parseFloat(sizeValue), sizeLabel, canName, status, parseInt(id, 10)]
-      );
-      saveDb();
-      return Response.json({ success: true, message: 'تم تحديث الطلب محليًا بنجاح' });
+    const updated = await Order.findByIdAndUpdate(
+      id,
+      {
+        companyName,
+        quantity: parseInt(quantity, 10),
+        sizeValue: parseFloat(sizeValue),
+        sizeLabel,
+        canName,
+        status,
+      },
+      { new: true }
+    );
+
+    if (!updated) {
+      return Response.json({ error: 'الطلب غير موجود' }, { status: 404 });
     }
+
+    return Response.json({ success: true, message: 'تم تحديث الطلب بنجاح' });
   } catch (error) {
+    console.error('PUT /api/orders error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 }
@@ -172,18 +141,17 @@ export async function DELETE(request) {
       return Response.json({ error: 'معرف الطلب مطلوب' }, { status: 400 });
     }
 
-    try {
-      const supabase = getSupabase();
-      const { error } = await supabase.from('orders').delete().eq('id', parseInt(id, 10));
-      if (error) throw error;
-      return Response.json({ success: true, message: 'تم حذف الطلب بنجاح' });
-    } catch (supabaseErr) {
-      const db = await getDb();
-      db.run('DELETE FROM orders WHERE id = ?;', [parseInt(id, 10)]);
-      saveDb();
-      return Response.json({ success: true, message: 'تم حذف الطلب محليًا بنجاح' });
+    await connectToDatabase();
+
+    const deleted = await Order.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return Response.json({ error: 'الطلب غير موجود' }, { status: 404 });
     }
+
+    return Response.json({ success: true, message: 'تم حذف الطلب بنجاح' });
   } catch (error) {
+    console.error('DELETE /api/orders error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 }
