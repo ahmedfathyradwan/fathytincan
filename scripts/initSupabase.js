@@ -5,16 +5,20 @@ require('dotenv').config({ path: path.resolve(process.cwd(), '.env.local') });
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+const SUPABASE_DB_CONNECTION = process.env.SUPABASE_DB_CONNECTION;
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-  console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_KEY in environment.');
+let connectionString = null;
+
+if (SUPABASE_DB_CONNECTION) {
+  // Use direct provided Postgres connection string (preferred if Service Role key not available)
+  connectionString = SUPABASE_DB_CONNECTION;
+} else if (SUPABASE_URL && SUPABASE_SERVICE_KEY) {
+  const { hostname } = new URL(SUPABASE_URL);
+  connectionString = `postgresql://postgres:${encodeURIComponent(SUPABASE_SERVICE_KEY)}@${hostname}:5432/postgres`;
+} else {
+  console.error('Missing SUPABASE_DB_CONNECTION or SUPABASE_SERVICE_KEY in environment.');
   process.exit(1);
 }
-
-const { hostname } = new URL(SUPABASE_URL);
-const connectionString = `postgresql://postgres:${encodeURIComponent(
-  SUPABASE_SERVICE_KEY
-)}@${hostname}:5432/postgres`;
 
 (async () => {
   const client = new Client({
